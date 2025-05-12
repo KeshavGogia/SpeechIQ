@@ -1,6 +1,3 @@
-// This is a client-side simulation of model inference
-// In a real application, you would send the audio to a server API endpoint
-
 export interface IntentAnalysisResult {
   intent: string
   confidence: number
@@ -8,30 +5,20 @@ export interface IntentAnalysisResult {
   entities?: Array<{ type: string; value: string }>
 }
 
-// Simulates sending audio to a server and getting a response
 export async function analyzeAudioIntent(audioBlob: Blob): Promise<IntentAnalysisResult> {
-  // In a real application, you would:
-  // 1. Send the audioBlob to your server API
-  // 2. Process it with your PyTorch model (best_cnn_gru_model_2.pt)
-  // 3. Return the results
 
-  // For demo purposes, we'll simulate a processing delay
   await new Promise((resolve) => setTimeout(resolve, 1500))
-
-  // Simulate different intents based on audio duration or size
   const intents = ["question", "statement", "request", "command"]
   const randomIndex = Math.floor(Math.random() * intents.length)
 
-  // Mock response that would come from your model
   return {
     intent: intents[randomIndex],
-    confidence: 0.75 + Math.random() * 0.2, // Random confidence between 0.75 and 0.95
+    confidence: 0.75 + Math.random() * 0.2, 
     transcript: getRandomTranscript(intents[randomIndex]),
     entities: getRandomEntities(intents[randomIndex]),
   }
 }
 
-// Helper functions to generate realistic mock data
 function getRandomTranscript(intent: string): string {
   const transcripts: Record<string, string[]> = {
     question: [
