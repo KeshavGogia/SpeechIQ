@@ -19,7 +19,7 @@ export function DashboardHeader() {
       <div className="flex h-16 items-center justify-between px-6">
         <div className="flex items-center gap-2">
           <Link href="/" className="flex items-center gap-2">
-            <span className="text-xl font-bold">VoiceInsight</span>
+            <span className="text-xl font-bold">SpeechIQ</span>
           </Link>
         </div>
         <div className="flex items-center gap-2">

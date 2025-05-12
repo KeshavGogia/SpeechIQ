@@ -11,15 +11,6 @@ export default function Dashboard() {
       <DashboardHeader />
       <main className="flex-1 p-6 md:p-10">
         <div className="mx-auto max-w-7xl space-y-8">
-          <Alert>
-            <InfoIcon className="h-4 w-4" />
-            <AlertTitle>Demo Mode</AlertTitle>
-            <AlertDescription>
-              This is a frontend demo that simulates intent recognition. In a production environment, you would connect
-              to a backend API that uses your PyTorch model (best_cnn_gru_model_2.pt).
-            </AlertDescription>
-          </Alert>
-
           <div className="flex flex-col space-y-2">
             <h1 className="text-3xl font-bold tracking-tight">Speaker Intent Recognition</h1>
             <p className="text-muted-foreground">
