@@ -107,7 +107,7 @@ export function AudioRecorder() {
       const formData = new FormData()
       formData.append("file", audioBlob, "recorded_audio.wav")
 
-      const response = await fetch("http://localhost:8000/predict-intent/", {
+      const response = await fetch("https://speech-backend-5rmy.onrender.com/predict-intent/", {
         method: "POST",
         body: formData, 
       })
