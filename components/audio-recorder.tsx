@@ -6,10 +6,9 @@ import { useRef, useState } from "react"
 import { Mic, Upload } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
+import { Card, CardContent, CardDescription,CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { AudioVisualizer } from "./audio-visualizer"
-import { analyzeAudioIntent } from "@/lib/analyze-audio"
 
 type RecordingState = "idle" | "recording" | "processing" | "ready"
 
@@ -18,6 +17,7 @@ export function AudioRecorder() {
   const [audioUrl, setAudioUrl] = useState<string | null>(null)
   const [countdown, setCountdown] = useState(3)
   const [audioBlob, setAudioBlob] = useState<Blob | null>(null)
+  const [predictedIntent, setPredictedIntent] = useState<string | null>(null)
 
   const mediaRecorderRef = useRef<MediaRecorder | null>(null)
   const audioChunksRef = useRef<Blob[]>([])
@@ -25,23 +25,19 @@ export function AudioRecorder() {
 
   const startRecording = async () => {
     try {
-      // Reset state
       setCountdown(3)
       audioChunksRef.current = []
 
-      // Get microphone access
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true })
       const mediaRecorder = new MediaRecorder(stream)
       mediaRecorderRef.current = mediaRecorder
 
-      // Set up data handling
       mediaRecorder.ondataavailable = (event) => {
         if (event.data.size > 0) {
           audioChunksRef.current.push(event.data)
         }
       }
 
-      // Set up completion handling
       mediaRecorder.onstop = () => {
         const audioBlob = new Blob(audioChunksRef.current, { type: "audio/wav" })
         setAudioBlob(audioBlob)
@@ -50,15 +46,12 @@ export function AudioRecorder() {
         setRecordingState("ready")
       }
 
-      // Start recording
       mediaRecorder.start()
       setRecordingState("recording")
 
-      // Set up countdown timer
       countdownIntervalRef.current = setInterval(() => {
         setCountdown((prev) => {
           if (prev <= 1) {
-            // Stop recording when countdown reaches 0
             clearInterval(countdownIntervalRef.current!)
             stopRecording()
             return 0
@@ -90,6 +83,7 @@ export function AudioRecorder() {
     setAudioBlob(null)
     setRecordingState("idle")
     setCountdown(3)
+    setPredictedIntent(null)
   }
 
   const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -100,6 +94,7 @@ export function AudioRecorder() {
       const url = URL.createObjectURL(blob)
       setAudioUrl(url)
       setRecordingState("ready")
+      setPredictedIntent(null)
     }
   }
 
@@ -109,36 +104,25 @@ export function AudioRecorder() {
     setRecordingState("processing")
 
     try {
-      // Call our client-side analysis function
-      const result = await analyzeAudioIntent(audioBlob)
+      const formData = new FormData()
+      formData.append("file", audioBlob, "recorded_audio.wav")
 
-      // Dispatch an event with the result
-      const event = new CustomEvent("intentRecognized", {
-        detail: {
-          intent: result.intent,
-          confidence: result.confidence,
-          entities: result.entities || [],
-          transcript: result.transcript || "Audio processed successfully",
-        },
+      const response = await fetch("http://127.0.0.1:8000/predict-intent/", {
+        method: "POST",
+        body: formData, 
       })
-      window.dispatchEvent(event)
 
-      // Reset to ready state
+      const data = await response.json()
+      setPredictedIntent(data.intent || "Unknown")
+
       setRecordingState("ready")
+      
+      // Dispatch event to update IntentDisplay
+      window.dispatchEvent(new CustomEvent("intentRecognized", { detail: { intent: data.intent || "Unknown", entities: []}}))
     } catch (error) {
       console.error("Error analyzing audio:", error)
+      setPredictedIntent("Error processing audio")
       setRecordingState("ready")
-
-      // Dispatch an error event
-      const event = new CustomEvent("intentRecognized", {
-        detail: {
-          intent: "error",
-          confidence: 0,
-          entities: [],
-          transcript: "Error processing audio",
-        },
-      })
-      window.dispatchEvent(event)
     }
   }
 
@@ -204,7 +188,13 @@ export function AudioRecorder() {
               <Upload className="h-8 w-8 text-muted-foreground mb-2" />
               <label htmlFor="audio-upload" className="cursor-pointer text-sm text-primary">
                 Upload audio file
-                <input id="audio-upload" type="file" accept="audio/*" className="sr-only" onChange={handleFileUpload} />
+                <input
+                  id="audio-upload"
+                  type="file"
+                  accept="audio/*"
+                  className="sr-only"
+                  onChange={handleFileUpload}
+                />
               </label>
               <p className="text-xs text-muted-foreground mt-1">MP3, WAV, or M4A up to 10MB</p>
             </div>
