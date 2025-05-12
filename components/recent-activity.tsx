@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import { Calendar, Clock, HelpCircle, MessageSquare, ThumbsUp } from "lucide-react"
+import { Calendar, Clock, HelpCircle,Volume2,Music,Lightbulb} from "lucide-react"
 
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
@@ -10,31 +10,27 @@ interface ActivityItem {
   id: string
   timestamp: string
   transcript: string
-  intent: "question" | "statement" | "request"
-  confidence: number
+  intent: "decrease_volume_none" | "activate_music_none" | "activate_lights_kitchen"
 }
 
 const mockActivities: ActivityItem[] = [
   {
     id: "1",
     timestamp: "2023-05-07T14:30:00Z",
-    transcript: "Can you schedule a meeting with the design team for tomorrow?",
-    intent: "question",
-    confidence: 0.92,
+    transcript: "The volume is too loud!",
+    intent: "decrease_volume_none",
   },
   {
     id: "2",
     timestamp: "2023-05-07T13:15:00Z",
-    transcript: "I need the quarterly report by Friday.",
-    intent: "request",
-    confidence: 0.88,
+    transcript: "Can you turn on the music?",
+    intent: "activate_music_none",
   },
   {
     id: "3",
     timestamp: "2023-05-07T11:45:00Z",
-    transcript: "The new feature will be released next week.",
-    intent: "statement",
-    confidence: 0.95,
+    transcript: "Turn on the kitchen's light.",
+    intent: "activate_lights_kitchen",
   },
 ]
 
@@ -42,17 +38,17 @@ export function RecentActivity() {
   const [activities] = useState<ActivityItem[]>(mockActivities)
 
   const getIntentIcon = (intent: string) => {
-    switch (intent) {
-      case "question":
-        return <HelpCircle className="h-4 w-4 text-blue-500" />
-      case "statement":
-        return <MessageSquare className="h-4 w-4 text-green-500" />
-      case "request":
-        return <ThumbsUp className="h-4 w-4 text-purple-500" />
-      default:
-        return null
-    }
+  switch (intent) {
+    case "decrease_volume_none":
+      return <Volume2 className="h-4 w-4 text-blue-500" />; 
+    case "activate_music_none":
+      return <Music className="h-4 w-4 text-green-500" />; 
+    case "activate_lights_kitchen":
+      return <Lightbulb className="h-4 w-4 text-purple-500" />; 
+    default:
+      return <HelpCircle className="h-4 w-4 text-gray-400" />; 
   }
+};
 
   const formatDate = (dateString: string) => {
     const date = new Date(dateString)
@@ -90,9 +86,7 @@ export function RecentActivity() {
                     {formatDate(activity.timestamp)}
                   </span>
                   <span className="flex items-center text-xs text-muted-foreground">Intent: {activity.intent}</span>
-                  <span className="flex items-center text-xs text-muted-foreground">
-                    Confidence: {Math.round(activity.confidence * 100)}%
-                  </span>
+                  
                 </div>
               </div>
             </div>
