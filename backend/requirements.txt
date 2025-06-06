@@ -6,4 +6,4 @@ transformers
 pydantic
 pandas
 uvicorn[standard]
- 
+python-multipart
